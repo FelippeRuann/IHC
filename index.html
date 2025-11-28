@@ -1,377 +1,298 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projeto AR.js - Realidade Aumentada</title>
+  <title>AR Simples - Funciona!</title>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
     }
 
-    #loading-screen {
+    #info {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 10px;
       width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-
-    #loading-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loader {
-      width: 60px;
-      height: 60px;
-      border: 5px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      color: white;
-      font-size: 18px;
-      margin-top: 20px;
-      font-weight: 500;
-    }
-
-    #instructions {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-size: 14px;
       text-align: center;
-      max-width: 90%;
       z-index: 1000;
-      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 14px;
+    }
+
+    .info-box {
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .detected {
+      background: rgba(0,200,0,0.8) !important;
     }
 
     #controls {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
       z-index: 1000;
-      backdrop-filter: blur(10px);
     }
 
-    .control-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    button {
+      background: rgba(100,100,255,0.9);
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 24px;
       margin: 5px;
       border-radius: 5px;
+      font-size: 16px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: transform 0.2s;
+      font-weight: bold;
     }
 
-    .control-btn:hover {
-      transform: scale(1.05);
+    button:active {
+      background: rgba(50,50,200,0.9);
     }
 
-    .control-btn:active {
-      transform: scale(0.95);
+    #upload-container {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      padding: 15px;
+      border-radius: 8px;
+      z-index: 1000;
+      max-width: 90%;
     }
 
     input[type="file"] {
-      margin: 10px 0;
-      padding: 5px;
+      color: white;
       font-size: 12px;
     }
 
-    .info-text {
-      font-size: 12px;
-      margin-top: 10px;
-      opacity: 0.8;
+    .marker-link {
+      color: #4CAF50;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <!-- Tela de Carregamento -->
-  <div id="loading-screen">
-    <div class="loader"></div>
-    <div class="loading-text">Carregando AR Experience...</div>
+  <!-- Informações -->
+  <div id="info">
+    <div class="info-box" id="status">📱 Procurando marcador...</div>
+    <div class="info-box">
+      📥 Marcador: <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" 
+         target="_blank" class="marker-link">Baixe aqui</a>
+    </div>
   </div>
 
-  <!-- Instruções -->
-  <div id="instructions">
-    📱 Aponte a câmera para o marcador Hiro<br>
-    👆 Clique no objeto 3D para mudar a cor
+  <!-- Upload de modelo -->
+  <div id="upload-container">
+    <label style="color: white; display: block; margin-bottom: 5px; font-size: 14px;">
+      📦 Carregar modelo 3D (.glb):
+    </label>
+    <input type="file" id="model-input" accept=".glb" onchange="loadModel(event)">
   </div>
 
   <!-- Controles -->
   <div id="controls">
-    <div style="margin-bottom: 10px; font-weight: bold;">⚙️ Controles</div>
-    <button class="control-btn" onclick="changeAnimation()">🔄 Animação</button>
-    <button class="control-btn" onclick="changeColor()">🎨 Cor</button>
-    <button class="control-btn" onclick="resetModel()">↺ Resetar</button>
-    <div class="info-text">
-      📦 Carregue seu modelo 3D (.glb/.gltf):
-    </div>
-    <input type="file" id="model-upload" accept=".glb,.gltf" onchange="loadCustomModel(event)">
+    <button onclick="changeColor()">🎨 Mudar Cor</button>
+    <button onclick="toggleAnimation()">⏯️ Animar</button>
+    <button onclick="resetAll()">🔄 Resetar</button>
   </div>
 
   <!-- Cena AR -->
   <a-scene
     embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; trackingMethod: best;"
-    vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true; colorManagement: true; sortObjects: true;"
-    loading-screen="enabled: false"
-    gesture-detector>
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    vr-mode-ui="enabled: false">
 
     <!-- Assets -->
     <a-assets>
-      <a-asset-item id="default-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+      <a-asset-item 
+        id="model" 
+        src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF-Binary/Duck.glb">
+      </a-asset-item>
     </a-assets>
 
     <!-- Marcador Hiro -->
-    <a-marker preset="hiro" id="main-marker">
+    <a-marker preset="hiro" id="marker">
+      
       <!-- Plano base -->
-      <a-plane
-        position="0 0 0"
-        rotation="-90 0 0"
-        width="2"
-        height="2"
-        color="#4CC3D9"
-        opacity="0.3"
-        material="side: double">
+      <a-plane 
+        position="0 0 0" 
+        rotation="-90 0 0" 
+        width="1.5" 
+        height="1.5" 
+        color="#4CAF50" 
+        opacity="0.5">
       </a-plane>
 
-      <!-- Modelo 3D Principal -->
+      <!-- Modelo 3D -->
       <a-entity
-        id="ar-model"
-        gltf-model="#default-model"
+        id="model-entity"
+        gltf-model="#model"
         position="0 0.5 0"
-        rotation="0 0 0"
-        scale="0.3 0.3 0.3"
-        animation__rotate="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
-        animation__float="property: position; to: 0 0.7 0; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
-        class="clickable">
+        scale="0.5 0.5 0.5"
+        rotation="0 0 0">
       </a-entity>
 
-      <!-- Iluminação -->
-      <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="0.8" color="#ffffff"></a-light>
-      <a-light type="point" position="0 2 0" intensity="0.5" color="#FFA500"></a-light>
+      <!-- Caixa simples (backup se modelo não carregar) -->
+      <a-box 
+        id="backup-box"
+        position="0 1 0" 
+        rotation="0 45 0" 
+        color="#FF6B6B"
+        scale="0.5 0.5 0.5"
+        visible="false">
+      </a-box>
 
-      <!-- Partículas decorativas -->
-      <a-entity id="particles" position="0 0 0">
-        <a-sphere position="0.5 1 0.5" radius="0.05" color="#FF6B6B" opacity="0.6"
-          animation="property: position; to: 0.5 1.5 0.5; dir: alternate; loop: true; dur: 1500"></a-sphere>
-        <a-sphere position="-0.5 1 0.5" radius="0.05" color="#4ECDC4" opacity="0.6"
-          animation="property: position; to: -0.5 1.5 0.5; dir: alternate; loop: true; dur: 1800"></a-sphere>
-        <a-sphere position="0 1 -0.5" radius="0.05" color="#FFE66D" opacity="0.6"
-          animation="property: position; to: 0 1.5 -0.5; dir: alternate; loop: true; dur: 2000"></a-sphere>
-      </a-entity>
-
-      <!-- Anel giratório -->
-      <a-torus
-        position="0 0.5 0"
-        radius="0.8"
-        radius-tubular="0.02"
-        color="#9D4EDD"
-        opacity="0.4"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
-      </a-torus>
     </a-marker>
 
-    <!-- Câmera AR -->
-    <a-entity camera look-controls="enabled: false"></a-entity>
+    <!-- Câmera -->
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
     // Variáveis globais
-    let animationActive = true;
+    let animating = true;
     let currentColor = 0;
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
-    let customModelUrl = null;
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#FFD93D', '#A8E6CF'];
+    let rotationSpeed = 0;
 
-    // Gesture Detector para mobile
-    AFRAME.registerComponent('gesture-detector', {
-      schema: {
-        enabled: { default: true }
-      },
-      init: function() {
-        this.handleTouchStart = this.handleTouchStart.bind(this);
-        this.handleTouchEnd = this.handleTouchEnd.bind(this);
-        this.el.addEventListener('touchstart', this.handleTouchStart);
-        this.el.addEventListener('touchend', this.handleTouchEnd);
-      },
-      handleTouchStart: function(e) {
-        this.startY = e.touches[0].clientY;
-      },
-      handleTouchEnd: function(e) {
-        const endY = e.changedTouches[0].clientY;
-        if (Math.abs(endY - this.startY) < 10) {
-          this.el.emit('tap');
-        }
-      }
+    // Detectar marcador
+    const marker = document.querySelector('#marker');
+    const statusBox = document.querySelector('#status');
+
+    marker.addEventListener('markerFound', () => {
+      console.log('✅ Marcador detectado!');
+      statusBox.textContent = '✅ Marcador detectado!';
+      statusBox.classList.add('detected');
+      startAnimation();
     });
 
-    // Remover tela de carregamento após inicialização
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('loading-screen').classList.add('hidden');
-      }, 2000);
+    marker.addEventListener('markerLost', () => {
+      console.log('❌ Marcador perdido');
+      statusBox.textContent = '📱 Procurando marcador...';
+      statusBox.classList.remove('detected');
     });
 
-    // Sistema de clique no modelo - ATUALIZADO para funcionar em mobile
-    AFRAME.registerComponent('clickable', {
-      init: function () {
-        this.handleClick = this.handleClick.bind(this);
-        this.el.addEventListener('click', this.handleClick);
-        this.el.sceneEl.addEventListener('tap', this.handleClick);
-      },
-      handleClick: function() {
-        changeColor();
-        triggerPulseEffect(this.el);
-      }
-    });
+    // Sistema de animação
+    function startAnimation() {
+      const modelEntity = document.querySelector('#model-entity');
+      if (!modelEntity) return;
 
-    // Alternar animação
-    function changeAnimation() {
-      const model = document.getElementById('ar-model');
-      animationActive = !animationActive;
-      
-      if (animationActive) {
-        model.setAttribute('animation__rotate', {
+      if (animating) {
+        modelEntity.setAttribute('animation', {
           property: 'rotation',
           to: '0 360 0',
           loop: true,
-          dur: 8000,
+          dur: 5000,
           easing: 'linear'
         });
-        model.setAttribute('animation__float', {
-          property: 'position',
-          to: '0 0.7 0',
-          dir: 'alternate',
+      }
+    }
+
+    // Alternar animação
+    function toggleAnimation() {
+      animating = !animating;
+      const modelEntity = document.querySelector('#model-entity');
+      
+      if (animating) {
+        modelEntity.setAttribute('animation', {
+          property: 'rotation',
+          to: '0 360 0',
           loop: true,
-          dur: 2000,
-          easing: 'easeInOutSine'
+          dur: 5000,
+          easing: 'linear'
         });
       } else {
-        model.removeAttribute('animation__rotate');
-        model.removeAttribute('animation__float');
+        modelEntity.removeAttribute('animation');
       }
     }
 
     // Mudar cor
     function changeColor() {
-      const model = document.getElementById('ar-model');
       currentColor = (currentColor + 1) % colors.length;
+      const modelEntity = document.querySelector('#model-entity');
+      const backupBox = document.querySelector('#backup-box');
       
-      model.setAttribute('material', {
-        color: colors[currentColor],
-        shader: 'standard',
-        metalness: 0.5,
-        roughness: 0.3
+      // Tenta aplicar cor no modelo
+      modelEntity.setAttribute('material', {
+        color: colors[currentColor]
       });
-    }
-
-    // Resetar modelo
-    function resetModel() {
-      const model = document.getElementById('ar-model');
-      model.setAttribute('position', '0 0.5 0');
-      model.setAttribute('rotation', '0 0 0');
-      model.setAttribute('scale', '0.3 0.3 0.3');
-      model.removeAttribute('material');
       
-      if (customModelUrl) {
-        model.setAttribute('gltf-model', customModelUrl);
-      } else {
-        model.setAttribute('gltf-model', '#default-model');
-      }
+      // Aplica na caixa backup também
+      backupBox.setAttribute('color', colors[currentColor]);
       
-      animationActive = true;
-      changeAnimation();
+      console.log('🎨 Cor mudada para:', colors[currentColor]);
     }
 
-    // Efeito de pulso ao clicar
-    function triggerPulseEffect(el) {
-      const currentScale = el.getAttribute('scale');
-      el.setAttribute('animation__pulse', {
-        property: 'scale',
-        to: `${currentScale.x * 1.2} ${currentScale.y * 1.2} ${currentScale.z * 1.2}`,
-        dur: 200,
-        dir: 'alternate',
-        loop: 1
-      });
+    // Resetar
+    function resetAll() {
+      const modelEntity = document.querySelector('#model-entity');
+      modelEntity.setAttribute('position', '0 0.5 0');
+      modelEntity.setAttribute('rotation', '0 0 0');
+      modelEntity.setAttribute('scale', '0.5 0.5 0.5');
+      modelEntity.removeAttribute('material');
+      currentColor = 0;
+      animating = true;
+      startAnimation();
+      console.log('🔄 Resetado!');
     }
 
-    // Carregar modelo 3D customizado
-    function loadCustomModel(event) {
+    // Carregar modelo customizado
+    function loadModel(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        customModelUrl = e.target.result;
-        const model = document.getElementById('ar-model');
-        model.setAttribute('gltf-model', customModelUrl);
+        const modelEntity = document.querySelector('#model-entity');
+        const assets = document.querySelector('a-assets');
         
-        // Resetar escala para novo modelo
-        model.setAttribute('scale', '0.5 0.5 0.5');
+        // Remove modelo antigo
+        const oldModel = document.querySelector('#model');
+        if (oldModel) oldModel.remove();
         
-        alert('✅ Modelo carregado com sucesso! Aponte para o marcador Hiro.');
+        // Cria novo asset
+        const newAsset = document.createElement('a-asset-item');
+        newAsset.id = 'model';
+        newAsset.src = e.target.result;
+        assets.appendChild(newAsset);
+        
+        // Atualiza entidade
+        modelEntity.setAttribute('gltf-model', '#model');
+        modelEntity.setAttribute('scale', '0.3 0.3 0.3');
+        
+        alert('✅ Modelo carregado! Aponte para o marcador Hiro');
+        console.log('📦 Novo modelo carregado');
       };
       reader.readAsDataURL(file);
     }
 
-    // Log de debug - MELHORADO
-    const marker = document.getElementById('main-marker');
-    
-    marker.addEventListener('markerFound', () => {
-      console.log('✅ Marcador detectado!');
-      document.getElementById('instructions').innerHTML = '✅ Marcador detectado!<br>👆 Toque no objeto 3D';
-      document.getElementById('instructions').style.background = 'rgba(0,200,0,0.8)';
+    // Verificar se o modelo carregou
+    document.querySelector('#model-entity').addEventListener('model-loaded', () => {
+      console.log('✅ Modelo 3D carregado com sucesso!');
     });
 
-    marker.addEventListener('markerLost', () => {
-      console.log('❌ Marcador perdido!');
-      document.getElementById('instructions').innerHTML = '📱 Aponte a câmera para o marcador Hiro<br>👆 Toque no objeto 3D';
-      document.getElementById('instructions').style.background = 'rgba(0,0,0,0.8)';
+    document.querySelector('#model-entity').addEventListener('model-error', () => {
+      console.log('❌ Erro ao carregar modelo, mostrando caixa backup');
+      document.querySelector('#backup-box').setAttribute('visible', true);
     });
 
-    // Verificar permissões de câmera
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(function(stream) {
-        console.log('✅ Câmera acessada com sucesso');
-        stream.getTracks().forEach(track => track.stop());
-      })
-      .catch(function(err) {
-        console.error('❌ Erro ao acessar câmera:', err);
-        alert('⚠️ Erro: Não foi possível acessar a câmera. Verifique as permissões do navegador.');
-      });
+    // Log inicial
+    console.log('🚀 AR.js iniciado');
+    console.log('📱 Abra em HTTPS');
+    console.log('📥 Baixe o marcador Hiro');
+    console.log('🎯 Aponte a câmera para o marcador');
   </script>
 </body>
 </html>
