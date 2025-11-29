@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR.js - Desktop & Mobile</title>
+  <title>AR.js - Realidade Aumentada</title>
   
   <!-- Bibliotecas AR.js + A-Frame -->
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
@@ -19,11 +19,10 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    /* Tela de seleção inicial */
-    #mode-selector {
+    /* Tela de seleção de dispositivo */
+    #device-selector {
       position: fixed;
       top: 0;
       left: 0;
@@ -38,132 +37,79 @@
       transition: opacity 0.5s;
     }
 
-    #mode-selector.hidden {
+    #device-selector.hidden {
       opacity: 0;
       pointer-events: none;
     }
 
-    .mode-title {
+    .selector-title {
       color: white;
-      font-size: 32px;
+      font-size: 36px;
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
-    .mode-subtitle {
-      color: rgba(255,255,255,0.8);
-      font-size: 16px;
-      margin-bottom: 40px;
+    .selector-subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 18px;
+      margin-bottom: 50px;
       text-align: center;
-      max-width: 500px;
+      max-width: 600px;
       padding: 0 20px;
     }
 
-    .mode-buttons {
+    .device-buttons {
       display: flex;
-      gap: 20px;
+      gap: 30px;
       flex-wrap: wrap;
       justify-content: center;
       padding: 0 20px;
     }
 
-    .mode-btn {
+    .device-btn {
       background: white;
       color: #667eea;
       border: none;
-      padding: 20px 40px;
-      border-radius: 12px;
-      font-size: 18px;
+      padding: 30px 50px;
+      border-radius: 15px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      min-width: 200px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      min-width: 220px;
     }
 
-    .mode-btn:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    .device-btn:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.3);
     }
 
-    .mode-btn:active {
-      transform: translateY(-2px);
+    .device-btn:active {
+      transform: translateY(-3px);
     }
 
-    .mode-btn .icon {
-      font-size: 40px;
+    .device-btn .icon {
+      font-size: 60px;
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
 
-    .mode-btn .text {
+    .device-btn .text {
       display: block;
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
     }
 
-    .mode-btn .desc {
+    .device-btn .desc {
       display: block;
-      font-size: 12px;
-      color: #999;
-      margin-top: 5px;
-      font-weight: normal;
-    }
-
-    /* QR Code para mobile */
-    #qr-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    #qr-container.active {
-      display: flex;
-    }
-
-    #qr-container h2 {
-      color: white;
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-
-    #qr-code {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    #mobile-url {
-      color: white;
-      background: rgba(255,255,255,0.1);
-      padding: 15px 25px;
-      border-radius: 8px;
       font-size: 14px;
-      margin-bottom: 20px;
-      word-break: break-all;
-      max-width: 80%;
-      text-align: center;
-    }
-
-    .close-btn {
-      background: #f44336;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
+      color: #888;
+      font-weight: normal;
+      line-height: 1.4;
     }
 
     /* Interface AR */
@@ -175,26 +121,50 @@
       display: block;
     }
 
+    #back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: rgba(244,67,54,0.95);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    #back-btn:hover {
+      background: rgba(244,67,54,1);
+      transform: scale(1.05);
+    }
+
     #camera-status {
       position: fixed;
       top: 15px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.9);
       color: white;
-      padding: 12px 25px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
       backdrop-filter: blur(10px);
       z-index: 1000;
       transition: all 0.3s;
       max-width: 90%;
       text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
     #camera-status.detected {
-      background: rgba(0,200,0,0.85);
+      background: rgba(0,200,0,0.9);
+      transform: translateX(-50%) scale(1.05);
     }
 
     #instructions {
@@ -202,21 +172,23 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.9);
       color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 18px 25px;
+      border-radius: 10px;
+      font-size: 14px;
       backdrop-filter: blur(10px);
       max-width: 90%;
-      line-height: 1.6;
+      line-height: 1.7;
       z-index: 1000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
     #instructions strong {
       color: #4CAF50;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      font-size: 16px;
     }
 
     #instructions a {
@@ -225,114 +197,147 @@
       font-weight: bold;
     }
 
+    #instructions a:hover {
+      text-decoration: underline;
+    }
+
     #controls-panel {
       position: fixed;
-      top: 70px;
+      top: 75px;
       right: 15px;
-      background: rgba(0,0,0,0.85);
-      padding: 15px;
-      border-radius: 10px;
+      background: rgba(0,0,0,0.9);
+      padding: 18px;
+      border-radius: 12px;
       backdrop-filter: blur(10px);
       z-index: 1000;
-      max-width: 280px;
+      max-width: 300px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
     #controls-panel h3 {
       color: white;
-      font-size: 16px;
-      margin-bottom: 12px;
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .control-btn {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .control-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.5);
     }
 
-    #back-btn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: rgba(244,67,54,0.9);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 1001;
+    .control-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .file-input-container {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .file-input-container label {
+      color: #B0B0B0;
+      font-size: 13px;
+      display: block;
+      margin-bottom: 8px;
     }
 
     input[type="file"] {
       color: white;
-      font-size: 12px;
+      font-size: 13px;
       background: rgba(255,255,255,0.1);
-      padding: 8px;
-      border-radius: 4px;
+      padding: 10px;
+      border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.2);
       width: 100%;
-      margin-top: 8px;
+      cursor: pointer;
     }
 
+    input[type="file"]::file-selector-button {
+      background: rgba(102,126,234,0.8);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-weight: 600;
+    }
+
+    /* Responsivo */
     @media (max-width: 768px) {
-      .mode-title {
-        font-size: 24px;
+      .selector-title {
+        font-size: 28px;
+      }
+
+      .selector-subtitle {
+        font-size: 16px;
       }
       
-      .mode-btn {
-        min-width: 150px;
-        padding: 15px 30px;
+      .device-btn {
+        min-width: 180px;
+        padding: 25px 40px;
+      }
+
+      .device-btn .icon {
+        font-size: 50px;
+      }
+
+      .device-btn .text {
+        font-size: 18px;
       }
 
       #controls-panel {
-        max-width: 200px;
+        max-width: 220px;
+        padding: 15px;
+      }
+
+      .control-btn {
+        font-size: 13px;
+        padding: 10px 16px;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Seletor de Modo -->
-  <div id="mode-selector">
-    <div class="mode-title">🎯 Escolha o Modo AR</div>
-    <div class="mode-subtitle">
-      Selecione como você deseja usar a Realidade Aumentada
+  <!-- Seletor de Dispositivo -->
+  <div id="device-selector">
+    <div class="selector-title">🎯 Realidade Aumentada</div>
+    <div class="selector-subtitle">
+      Escolha o dispositivo que você está usando
     </div>
     
-    <div class="mode-buttons">
-      <button class="mode-btn" onclick="startDesktopMode()">
+    <div class="device-buttons">
+      <button class="device-btn" onclick="startAR('desktop')">
         <span class="icon">💻</span>
-        <span class="text">Modo Desktop</span>
-        <span class="desc">Usar webcam do notebook</span>
+        <span class="text">Desktop</span>
+        <span class="desc">Usar webcam do computador</span>
       </button>
       
-      <button class="mode-btn" onclick="showMobileLink()">
+      <button class="device-btn" onclick="startAR('mobile')">
         <span class="icon">📱</span>
-        <span class="text">Vincular Celular</span>
-        <span class="desc">Gerar QR Code para mobile</span>
+        <span class="text">Mobile</span>
+        <span class="desc">Usar câmera do celular</span>
       </button>
     </div>
-  </div>
-
-  <!-- QR Code para Mobile -->
-  <div id="qr-container">
-    <h2>📱 Escaneie o QR Code no celular</h2>
-    <div id="qr-code"></div>
-    <div id="mobile-url"></div>
-    <button class="close-btn" onclick="closeMobileLink()">✕ Fechar</button>
   </div>
 
   <!-- Interface AR -->
@@ -342,11 +347,12 @@
     <div id="camera-status">📷 Inicializando câmera...</div>
 
     <div id="instructions">
-      <strong>📋 INSTRUÇÕES:</strong>
-      1. <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank">Baixe o marcador Hiro</a><br>
+      <strong>📋 COMO USAR:</strong>
+      1. <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank">Baixe o marcador Hiro aqui</a><br>
       2. Imprima ou abra em outra tela<br>
-      3. Aponte a câmera (20-40cm)<br>
-      4. Aguarde detecção (2-3 seg)
+      3. Aponte a câmera (distância: 20-40cm)<br>
+      4. Aguarde 2-3 segundos para detecção<br>
+      💡 Ambiente bem iluminado funciona melhor!
     </div>
 
     <div id="controls-panel">
@@ -354,10 +360,11 @@
       <button class="control-btn" onclick="changeColor()">🎨 Mudar Cor</button>
       <button class="control-btn" onclick="toggleAnimation()">⏯️ Animar/Pausar</button>
       <button class="control-btn" onclick="resetModel()">🔄 Resetar</button>
-      <label style="color: #B0B0B0; font-size: 12px; display: block; margin-top: 15px; margin-bottom: 5px;">
-        📦 Carregar modelo .glb:
-      </label>
-      <input type="file" accept=".glb" onchange="loadCustomModel(event)">
+      
+      <div class="file-input-container">
+        <label>📦 Carregar modelo 3D (.glb):</label>
+        <input type="file" accept=".glb" onchange="loadCustomModel(event)">
+      </div>
     </div>
   </div>
 
@@ -378,15 +385,18 @@
 
     <a-marker preset="hiro" id="hiro-marker">
       
+      <!-- Plano base -->
       <a-plane 
         position="0 0 0" 
         rotation="-90 0 0" 
         width="1.8" 
         height="1.8" 
         color="#2196F3" 
-        opacity="0.4">
+        opacity="0.4"
+        material="side: double">
       </a-plane>
 
+      <!-- Modelo 3D -->
       <a-entity
         id="main-model"
         gltf-model="#duck-model"
@@ -396,6 +406,7 @@
         animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear">
       </a-entity>
 
+      <!-- Anel decorativo -->
       <a-torus
         position="0 0.5 0"
         radius="0.6"
@@ -405,6 +416,7 @@
         animation="property: rotation; to: 0 360 0; loop: true; dur: 8000">
       </a-torus>
 
+      <!-- Partículas -->
       <a-sphere 
         position="0.4 1.2 0" 
         radius="0.04" 
@@ -421,6 +433,7 @@
         animation="property: position; to: -0.4 1.5 0; dir: alternate; loop: true; dur: 1700">
       </a-sphere>
 
+      <!-- Iluminação -->
       <a-light type="ambient" intensity="0.6"></a-light>
       <a-light type="directional" position="2 3 1" intensity="0.7"></a-light>
 
@@ -429,109 +442,68 @@
     <a-entity camera></a-entity>
   </a-scene>
 
-  <!-- QR Code Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
   <script>
     // ==========================================
     // VARIÁVEIS GLOBAIS
     // ==========================================
     let isAnimating = true;
     let currentColorIndex = 0;
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#FFD93D', '#BB8FCE'];
-    let currentMode = null;
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#FFD93D', '#BB8FCE', '#F06292'];
+    let currentDevice = null;
 
     // ==========================================
-    // DETECÇÃO AUTOMÁTICA DE DISPOSITIVO
+    // INICIAR AR
     // ==========================================
-    function isMobileDevice() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    // Se for mobile, pula direto para o AR
-    window.addEventListener('load', () => {
-      if (isMobileDevice()) {
-        console.log('📱 Dispositivo mobile detectado - iniciando modo mobile');
-        startDesktopMode(); // No mobile, funciona diretamente
-      }
-    });
-
-    // ==========================================
-    // MODO DESKTOP (WEBCAM)
-    // ==========================================
-    function startDesktopMode() {
-      console.log('💻 Iniciando modo Desktop');
-      currentMode = 'desktop';
+    function startAR(device) {
+      console.log(`🚀 Iniciando AR em modo: ${device}`);
+      currentDevice = device;
       
       // Esconde seletor
-      document.getElementById('mode-selector').classList.add('hidden');
+      document.getElementById('device-selector').classList.add('hidden');
       
       // Mostra interface AR
       document.getElementById('ar-interface').classList.add('active');
       document.getElementById('ar-scene').style.display = 'block';
       
       // Inicializa câmera
-      initCamera();
-    }
-
-    // ==========================================
-    // VINCULAR CELULAR (QR CODE)
-    // ==========================================
-    function showMobileLink() {
-      console.log('📱 Gerando link para celular');
-      
-      const currentUrl = window.location.href;
-      const qrContainer = document.getElementById('qr-container');
-      const qrCodeDiv = document.getElementById('qr-code');
-      const urlDiv = document.getElementById('mobile-url');
-      
-      // Limpa QR anterior
-      qrCodeDiv.innerHTML = '';
-      
-      // Gera novo QR Code
-      new QRCode(qrCodeDiv, {
-        text: currentUrl,
-        width: 256,
-        height: 256,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-      
-      // Mostra URL
-      urlDiv.textContent = currentUrl;
-      
-      // Exibe modal
-      qrContainer.classList.add('active');
-    }
-
-    function closeMobileLink() {
-      document.getElementById('qr-container').classList.remove('active');
+      setTimeout(() => {
+        initCamera();
+      }, 500);
     }
 
     // ==========================================
     // VOLTAR AO MENU
     // ==========================================
     function backToMenu() {
+      console.log('← Voltando ao menu');
+      
       // Para a câmera
-      const scene = document.querySelector('a-scene');
-      if (scene && scene.components && scene.components.arjs) {
-        // Para o streaming de vídeo
-        const video = scene.querySelector('video');
-        if (video && video.srcObject) {
-          video.srcObject.getTracks().forEach(track => track.stop());
-        }
-      }
+      stopCamera();
       
       // Esconde interface AR
       document.getElementById('ar-interface').classList.remove('active');
       document.getElementById('ar-scene').style.display = 'none';
       
       // Mostra seletor novamente
-      document.getElementById('mode-selector').classList.remove('hidden');
+      document.getElementById('device-selector').classList.remove('hidden');
       
-      currentMode = null;
-      console.log('← Voltou ao menu');
+      currentDevice = null;
+    }
+
+    // ==========================================
+    // PARAR CÂMERA
+    // ==========================================
+    function stopCamera() {
+      const scene = document.querySelector('a-scene');
+      if (scene) {
+        const video = scene.querySelector('video');
+        if (video && video.srcObject) {
+          video.srcObject.getTracks().forEach(track => {
+            track.stop();
+            console.log('🔴 Câmera parada');
+          });
+        }
+      }
     }
 
     // ==========================================
@@ -540,9 +512,13 @@
     function initCamera() {
       const statusDiv = document.getElementById('camera-status');
       
-      navigator.mediaDevices.getUserMedia({ video: true })
+      navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: currentDevice === 'mobile' ? 'environment' : 'user'
+        } 
+      })
         .then(stream => {
-          console.log('✅ Câmera acessada');
+          console.log('✅ Câmera acessada com sucesso');
           statusDiv.textContent = '✅ Câmera OK - Mostre o marcador Hiro';
           // Para o stream de teste
           stream.getTracks().forEach(track => track.stop());
@@ -550,8 +526,8 @@
         .catch(err => {
           console.error('❌ Erro ao acessar câmera:', err);
           statusDiv.textContent = '❌ Erro ao acessar câmera';
-          statusDiv.style.background = 'rgba(200,0,0,0.85)';
-          alert('⚠️ Não foi possível acessar a câmera.\nVerifique as permissões do navegador.');
+          statusDiv.style.background = 'rgba(200,0,0,0.9)';
+          alert('⚠️ Não foi possível acessar a câmera.\n\nVerifique:\n• Permissões do navegador\n• Site em HTTPS\n• Câmera não está em uso');
         });
     }
 
@@ -559,18 +535,17 @@
     // DETECTAR MARCADOR
     // ==========================================
     const marker = document.querySelector('#hiro-marker');
+    const statusDiv = document.getElementById('camera-status');
     
     if (marker) {
       marker.addEventListener('markerFound', () => {
         console.log('✅ MARCADOR DETECTADO!');
-        const statusDiv = document.getElementById('camera-status');
-        statusDiv.textContent = '✅ Marcador detectado!';
+        statusDiv.textContent = '✅ Marcador detectado! Objeto visível';
         statusDiv.classList.add('detected');
       });
 
       marker.addEventListener('markerLost', () => {
         console.log('❌ Marcador perdido');
-        const statusDiv = document.getElementById('camera-status');
         statusDiv.textContent = '📷 Procurando marcador...';
         statusDiv.classList.remove('detected');
       });
@@ -590,7 +565,7 @@
         roughness: 0.5
       });
 
-      console.log('🎨 Cor alterada:', colors[currentColorIndex]);
+      console.log('🎨 Cor alterada para:', colors[currentColorIndex]);
     }
 
     function toggleAnimation() {
@@ -624,8 +599,8 @@
       isAnimating = true;
       toggleAnimation();
       
-      console.log('🔄 Resetado');
-      alert('✅ Modelo resetado!');
+      console.log('🔄 Modelo resetado');
+      alert('✅ Modelo resetado com sucesso!');
     }
 
     function loadCustomModel(event) {
@@ -637,34 +612,37 @@
         const model = document.querySelector('#main-model');
         const assets = document.querySelector('a-assets');
         
+        // Remove asset anterior se existir
         const oldAsset = document.querySelector('#custom-model');
         if (oldAsset) oldAsset.remove();
         
+        // Cria novo asset
         const newAsset = document.createElement('a-asset-item');
         newAsset.id = 'custom-model';
         newAsset.src = e.target.result;
         assets.appendChild(newAsset);
         
+        // Aplica no modelo
         setTimeout(() => {
           model.setAttribute('gltf-model', '#custom-model');
           model.setAttribute('scale', '0.3 0.3 0.3');
           console.log('📦 Modelo customizado carregado');
         }, 100);
         
-        alert('✅ Modelo carregado!');
+        alert('✅ Modelo carregado! Aponte para o marcador Hiro');
       };
       
       reader.readAsDataURL(file);
     }
 
     // ==========================================
-    // LOGS
+    // LOGS INICIAIS
     // ==========================================
-    console.log('═══════════════════════════════════');
-    console.log('🚀 AR.js Iniciado');
-    console.log('💻 Modo Desktop: Webcam do notebook');
-    console.log('📱 Modo Mobile: Link/QR Code');
-    console.log('═══════════════════════════════════');
+    console.log('═══════════════════════════════════════');
+    console.log('🚀 AR.js + A-Frame Iniciado');
+    console.log('💻 Desktop: Webcam do computador');
+    console.log('📱 Mobile: Câmera do celular');
+    console.log('═══════════════════════════════════════');
   </script>
 </body>
 </html>
