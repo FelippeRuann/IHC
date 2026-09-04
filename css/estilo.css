@@ -1,0 +1,309 @@
+/* ar-tutor — estilo do motor.
+   Nada aqui e especifico de um tutorial: sao a tela de abertura, o overlay de
+   instrucao e o status da camera, que valem para qualquer conteudo. */
+
+:root {
+  --fundo: #06070c;
+  --superficie: rgba(11, 14, 22, 0.9);
+  --borda: rgba(255, 255, 255, 0.14);
+  --texto: #f6f8fc;
+  --texto-fraco: #a9b2c4;
+  --destaque: #ffcf3f;
+  --ok: #5ce08a;
+  --alerta: #ffcf3f;
+  --erro: #ff7a7a;
+  --raio: 14px;
+  --sombra: 0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body { overflow: hidden; }
+
+[hidden] { display: none !important; }
+
+/* O AR.js injeta o proprio aviso de erro de camera; o motor mostra o seu,
+   com texto que diz o que fazer. */
+#error-popup { display: none !important; }
+
+/* ---------------------------------------------------------------- abertura */
+
+.tela {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+  overflow-y: auto;
+  background:
+    radial-gradient(1100px 620px at 50% -10%, #1b2440 0%, transparent 65%),
+    var(--fundo);
+}
+
+.cartao {
+  width: min(560px, 100%);
+  padding: 30px 28px 26px;
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+
+.marca {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--destaque);
+}
+
+.cartao h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.2;
+}
+
+.descricao {
+  margin: 0 0 22px;
+  color: var(--texto-fraco);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.preparo {
+  margin: 0 0 26px;
+  padding-left: 20px;
+  color: var(--texto-fraco);
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.preparo li { margin-bottom: 4px; }
+.preparo a { color: var(--destaque); }
+
+.rotulo {
+  margin: 0 0 12px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.escolha-dispositivo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dispositivo {
+  display: grid;
+  gap: 3px;
+  padding: 18px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--texto);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.dispositivo:hover,
+.dispositivo:focus-visible {
+  border-color: var(--destaque);
+  background: rgba(255, 207, 63, 0.12);
+  outline: none;
+}
+
+.dispositivo:active { transform: translateY(1px); }
+.dispositivo__icone { font-size: 1.7rem; line-height: 1.2; }
+.dispositivo__nome { font-size: 1.06rem; font-weight: 600; }
+.dispositivo__ajuda { font-size: 0.8rem; color: var(--texto-fraco); }
+
+.aviso {
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 122, 122, 0.45);
+  border-radius: var(--raio);
+  background: rgba(255, 122, 122, 0.1);
+  color: var(--erro);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ cena AR */
+
+#palco { position: fixed; inset: 0; z-index: 0; }
+
+/* O AR.js posiciona o video e o canvas no body; ambos ficam atras do overlay. */
+#arjs-video,
+#palco canvas,
+a-scene canvas {
+  position: fixed !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* ------------------------------------------------------------------ overlay */
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+#barra-topo,
+#painel-passo {
+  pointer-events: auto;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--sombra);
+}
+
+#barra-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+#titulo-tutorial {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+/* Rastreamento por marcador falha em silencio: sem este indicador o usuario
+   nao consegue distinguir "camera nao iniciou" de "marcador nao detectado". */
+.status {
+  margin: 0;
+  padding: 5px 11px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status--neutro { color: var(--texto-fraco); }
+.status--ok     { color: var(--ok); }
+.status--alerta { color: var(--alerta); }
+.status--erro   { color: var(--erro); }
+
+#painel-passo { padding: 14px 16px 16px; }
+
+#progresso {
+  height: 6px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+#progresso-preenchido {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--destaque);
+  transition: width 0.28s ease;
+}
+
+#contador-passo {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--destaque);
+}
+
+/* Lido a meio metro de distancia, com o celular na mao: tamanho grande e
+   contraste alto nao sao enfeite. */
+#instrucao {
+  margin: 0 0 16px;
+  font-size: clamp(1.14rem, 4.4vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.35;
+  min-height: 2.7em;
+}
+
+#controles {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+}
+
+.botao {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.botao:hover:not(:disabled),
+.botao:focus-visible:not(:disabled) {
+  border-color: var(--destaque);
+  background: rgba(255, 255, 255, 0.13);
+  outline: none;
+}
+
+.botao--principal {
+  border-color: transparent;
+  background: var(--destaque);
+  color: #10131b;
+}
+
+.botao--principal:hover:not(:disabled),
+.botao--principal:focus-visible:not(:disabled) {
+  background: #ffdd76;
+}
+
+.botao--discreto {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--texto-fraco);
+}
+
+.botao:disabled { opacity: 0.4; cursor: default; }
+
+@media (max-width: 380px) {
+  #controles { grid-template-columns: 1fr 1fr; }
+  #btn-reiniciar { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
