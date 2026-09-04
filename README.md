@@ -19,6 +19,8 @@ no celular e no desktop.
 2. Abra a demonstração e escolha *Desktop* ou *Celular*.
 3. Autorize o acesso à câmera.
 4. Aponte para o marcador a uns 20–40 cm.
+5. Arraste na tela para girar a visão e ver as outras faces — no desktop,
+   `Shift` + setas. **Centralizar visão** volta ao ângulo inicial.
 
 Ambiente bem iluminado melhora bastante a detecção. O reconhecimento leva de 2 a
 3 segundos.
@@ -75,6 +77,12 @@ que fazer.
 continua no passo 5. Quem está com as mãos ocupadas tira a câmera do marcador o
 tempo todo. O progresso vive no motor, fora da cena 3D, e por isso não depende do
 rastreamento.
+
+**A visão gira com um arrasto.** Rastreamento por marcador só mostra o objeto
+pelo lado de onde a câmera está, e rodear o marcador nem sempre dá: quem segue o
+tutorial normalmente está com as duas mãos ocupadas pelo objeto real. O arrasto
+gira a raiz da cena, sem mexer na pose que o marcador impõe — é do motor, não do
+conteúdo, e vale para qualquer tutorial.
 
 **A próxima face fica realçada.** Antes de girar, a camada que o próximo passo
 vai mover recebe um brilho leve — ler "gire a face direita" e ver qual é levam

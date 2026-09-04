@@ -89,6 +89,14 @@
       </div>
       <p id="contador-passo"></p>
       <p id="instrucao" aria-live="polite"></p>
+      <!-- Rastreamento por marcador so mostra o objeto do lado de onde a
+           camera esta, e rodear o marcador com as maos ocupadas nao e viavel:
+           daqui o usuario gira a propria visao. -->
+      <div id="linha-visao">
+        <p id="dica-visao">Arraste na tela para girar a visão · Shift + setas no teclado</p>
+        <button id="btn-centralizar" class="botao botao--minimo" type="button">Centralizar visão</button>
+      </div>
+
       <div id="controles">
         <button id="btn-anterior" class="botao" type="button">‹ Anterior</button>
         <button id="btn-proximo" class="botao botao--principal" type="button">Próximo ›</button>

@@ -32,7 +32,8 @@ export function criarInterface() {
     instrucao: document.getElementById('instrucao'),
     anterior: document.getElementById('btn-anterior'),
     proximo: document.getElementById('btn-proximo'),
-    reiniciar: document.getElementById('btn-reiniciar')
+    reiniciar: document.getElementById('btn-reiniciar'),
+    centralizar: document.getElementById('btn-centralizar')
   };
 
   let cameraComErro = false;
@@ -56,15 +57,18 @@ export function criarInterface() {
     },
 
     /** Liga os controles do overlay as acoes do motor. */
-    aoNavegar({ anterior, proximo, reiniciar }) {
+    aoNavegar({ anterior, proximo, reiniciar, centralizarVisao }) {
       el.anterior.addEventListener('click', anterior);
       el.proximo.addEventListener('click', proximo);
       el.reiniciar.addEventListener('click', reiniciar);
+      el.centralizar.addEventListener('click', centralizarVisao);
 
       // Com o celular na mao um teclado nao ajuda, mas no desktop o tutorial
       // e usado com as duas maos ocupadas pelo objeto real.
       window.addEventListener('keydown', (evento) => {
         if (evento.target.matches('input, textarea, select')) return;
+        // Setas com Shift giram a visao, e quem trata isso e o motor.
+        if (evento.shiftKey || evento.ctrlKey || evento.altKey || evento.metaKey) return;
         if (evento.key === 'ArrowRight') { evento.preventDefault(); proximo(); }
         if (evento.key === 'ArrowLeft') { evento.preventDefault(); anterior(); }
       });
@@ -91,6 +95,7 @@ export function criarInterface() {
       el.anterior.disabled = estado.primeiro || estado.ocupado || !estado.iniciado;
       el.proximo.disabled = estado.ultimo || estado.ocupado || !estado.iniciado;
       el.reiniciar.disabled = estado.ocupado || !estado.iniciado;
+      el.centralizar.disabled = !estado.iniciado;
       el.proximo.textContent = estado.ultimo ? 'Concluído' : 'Próximo ›';
     },
 

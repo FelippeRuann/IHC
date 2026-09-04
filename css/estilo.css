@@ -147,17 +147,39 @@ body { overflow: hidden; }
 
 /* ------------------------------------------------------------------ cena AR */
 
-#palco { position: fixed; inset: 0; z-index: 0; }
+/* Ordem de pintura, de tras para frente: fundo da pagina, video da camera,
+   canvas 3D, overlay.
 
-/* O AR.js posiciona o video e o canvas no body; ambos ficam atras do overlay. */
-#arjs-video,
+   O video precisa de z-index explicito. O AR.js fixa `z-index: -2` inline no
+   elemento, e como o `html` acima tem fundo proprio o fundo do `body` nao e
+   propagado para o viewport: ele e pintado como fundo de um bloco comum, o que
+   na ordem de pintura fica acima de tudo que tem z-index negativo — e a camera
+   inteira desaparecia atras de um retangulo solido. O !important e o que vence
+   o estilo inline do AR.js; as margens inline tambem precisam ser zeradas, ou
+   o quadro fica deslocado e sobra uma faixa vazia na lateral. */
+#palco {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  touch-action: none; /* o arrasto gira a visao; nao deve rolar a pagina */
+}
+
+#arjs-video {
+  position: fixed !important;
+  inset: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  z-index: 0 !important;
+}
+
 #palco canvas,
 a-scene canvas {
   position: fixed !important;
   inset: 0;
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
   z-index: 0;
 }
 
@@ -251,6 +273,37 @@ a-scene canvas {
   font-weight: 600;
   line-height: 1.35;
   min-height: 2.7em;
+}
+
+/* A dica fica sempre visivel de proposito: arrastar para girar nao e um gesto
+   que o usuario adivinhe, e sem descobri-lo o objeto parece preso ao marcador. */
+#linha-visao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+#dica-visao {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: var(--texto-fraco);
+}
+
+.botao--minimo {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--texto-fraco);
+}
+
+@media (max-width: 460px) {
+  #linha-visao { flex-direction: column; align-items: stretch; }
+  #dica-visao { text-align: center; }
 }
 
 #controles {

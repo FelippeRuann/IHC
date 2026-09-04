@@ -208,3 +208,112 @@ export function iniciarCenaAr({ dispositivo, aoStatus }) {
     else cena.addEventListener('loaded', pronto, { once: true });
   });
 }
+
+/* ------------------------------------------------------ controle de visao */
+
+const INCLINACAO_MAXIMA = 55;  // graus; alem disso a cena vira de cabeca para baixo
+const GRAUS_POR_PIXEL = 0.4;   // sensibilidade do arrasto
+const PASSO_TECLADO = 12;      // graus por seta com Shift, no desktop
+
+const emRadianos = (graus) => (graus * Math.PI) / 180;
+const limitar = (valor, minimo, maximo) => Math.min(Math.max(valor, minimo), maximo);
+
+/**
+ * Permite girar a visao do tutorial arrastando a tela.
+ *
+ * Isto pertence ao motor, e nao ao conteudo: gira a entidade raiz inteira sem
+ * saber o que foi desenhado dentro dela. O rastreamento por marcador so mostra
+ * o objeto pelo lado de onde a camera esta, e rodear o marcador nem sempre e
+ * possivel — com as duas maos ocupadas pelo objeto real, girar a visao e a
+ * unica forma de olhar as outras faces.
+ *
+ * A rotacao e local a raiz, entao nao interfere na pose que o marcador impoe
+ * nem nas coordenadas com que o conteudo faz as proprias contas.
+ *
+ * @param {Element} raiz a entidade devolvida por iniciarCenaAr
+ * @returns {{ centralizar: () => void, encerrar: () => void }}
+ */
+export function criarControleDeVisao(raiz) {
+  const alvo = raiz.object3D;
+  const palco = document.getElementById('palco');
+
+  // YXZ aplica o giro horizontal antes da inclinacao, que e o que torna o
+  // arrasto previsivel: a linha do horizonte nao tomba de lado.
+  alvo.rotation.order = 'YXZ';
+
+  let giro = 0;
+  let inclinacao = 0;
+  let ponteiro = null;
+  let anterior = null;
+
+  function aplicar() {
+    alvo.rotation.set(emRadianos(inclinacao), emRadianos(giro), 0);
+  }
+
+  function girarPor(deltaX, deltaY) {
+    giro += deltaX;
+    inclinacao = limitar(inclinacao + deltaY, -INCLINACAO_MAXIMA, INCLINACAO_MAXIMA);
+    aplicar();
+  }
+
+  function aoPressionar(evento) {
+    if (ponteiro !== null) return;  // um dedo por vez; o segundo seria ruido
+    ponteiro = evento.pointerId;
+    anterior = { x: evento.clientX, y: evento.clientY };
+    palco.setPointerCapture?.(ponteiro);
+  }
+
+  function aoMover(evento) {
+    if (evento.pointerId !== ponteiro) return;
+    girarPor(
+      (evento.clientX - anterior.x) * GRAUS_POR_PIXEL,
+      (evento.clientY - anterior.y) * GRAUS_POR_PIXEL
+    );
+    anterior = { x: evento.clientX, y: evento.clientY };
+  }
+
+  function aoSoltar(evento) {
+    if (evento.pointerId !== ponteiro) return;
+    palco.releasePointerCapture?.(ponteiro);
+    ponteiro = null;
+  }
+
+  // Shift + setas gira a visao no desktop. As setas sozinhas continuam sendo
+  // navegacao de passos, tratada pela interface.
+  function aoTeclar(evento) {
+    if (!evento.shiftKey) return;
+    const giros = {
+      ArrowLeft:  [-PASSO_TECLADO, 0],
+      ArrowRight: [PASSO_TECLADO, 0],
+      ArrowUp:    [0, -PASSO_TECLADO],
+      ArrowDown:  [0, PASSO_TECLADO]
+    };
+    const passo = giros[evento.key];
+    if (!passo) return;
+    evento.preventDefault();
+    girarPor(passo[0], passo[1]);
+  }
+
+  palco.addEventListener('pointerdown', aoPressionar);
+  palco.addEventListener('pointermove', aoMover);
+  palco.addEventListener('pointerup', aoSoltar);
+  palco.addEventListener('pointercancel', aoSoltar);
+  window.addEventListener('keydown', aoTeclar);
+
+  return {
+    /** Devolve a visao ao angulo em que o tutorial comecou. */
+    centralizar() {
+      giro = 0;
+      inclinacao = 0;
+      aplicar();
+    },
+
+    encerrar() {
+      palco.removeEventListener('pointerdown', aoPressionar);
+      palco.removeEventListener('pointermove', aoMover);
+      palco.removeEventListener('pointerup', aoSoltar);
+      palco.removeEventListener('pointercancel', aoSoltar);
+      window.removeEventListener('keydown', aoTeclar);
+    }
+  };
+}
